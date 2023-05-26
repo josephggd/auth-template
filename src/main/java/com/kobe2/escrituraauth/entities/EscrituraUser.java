@@ -1,6 +1,7 @@
 package com.kobe2.escrituraauth.entities;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import lombok.*;
 
@@ -9,7 +10,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@NoArgsConstructor
+@RequiredArgsConstructor
+@NoArgsConstructor(force = true)
 @AllArgsConstructor
 public class EscrituraUser extends AbstractEntity{
     @NonNull
@@ -18,5 +20,7 @@ public class EscrituraUser extends AbstractEntity{
     private String pw;
     private boolean enabled = false;
     @OneToMany
-    private Set<ConfirmationCode> code;
+    private Set<ConfirmationCode> codes;
+    @ManyToMany
+    private Set<UserRole> roles;
 }

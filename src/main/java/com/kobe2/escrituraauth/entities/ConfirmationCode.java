@@ -5,21 +5,19 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(force = true)
+@RequiredArgsConstructor
 public class ConfirmationCode extends AbstractEntity implements Comparable<ConfirmationCode>{
-    @NonNull
-    private LocalDate expiration;
-    @NonNull
-    private UUID code;
+    private static Long expirationPlusDays = 1L;
+    private LocalDate expiration = LocalDate.now().plusDays(expirationPlusDays);
+    private UUID code = UUID.randomUUID();
     @ManyToOne
+    @NonNull
     private EscrituraUser user;
 
     public boolean isExpired(){
