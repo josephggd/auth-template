@@ -2,7 +2,6 @@ package com.kobe2.escrituraauth.services;
 
 import com.kobe2.escrituraauth.dtos.LocationRecord;
 import com.kobe2.escrituraauth.feign.Client;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 public class AuthenticatedService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
-    @NonNull
     private final Client client;
     public Map<String, List<LocationRecord>> getLocationsViaClient(
         String email
@@ -25,4 +23,5 @@ public class AuthenticatedService {
         ResponseEntity<Map<String, List<LocationRecord>>> responseEntity = client.getLocations(email);
         return responseEntity.getBody();
     }
+    // TODO: query for user's locations
 }
