@@ -71,6 +71,6 @@ public class UnauthenticatedService {
         logger.log(Level.FINEST, "loginSendForgotPass");
         EscrituraUser user = basicUserService.findByEmail(email);
         EscrituraUser userWithUserCode = authenticationCodeService.addNewCode(user, CodePurpose.FORGOT);
-        mqProducer.sendConfirmationCode(userWithUserCode);
+        mqProducer.sendForgotPass(userWithUserCode);
     }
 }

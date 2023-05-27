@@ -17,4 +17,6 @@ public class MqProps {
     public String password;
     @Value("custom.mq.key")
     public String key;
+    @Value("custom.mq.queue")
+    public String queue;
 }

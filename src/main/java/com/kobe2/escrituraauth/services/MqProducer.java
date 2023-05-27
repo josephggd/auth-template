@@ -8,14 +8,18 @@ import com.kobe2.escrituraauth.rmq.MqProps;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MqProducer {
     private static final Logger logger = LoggerFactory.getLogger(MqProducer.class);
-    private final RabbitTemplate rabbitTemplate;
-    private final MqProps mqProps;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private Queue queue;
     private void sendMessage(CodePurpose purpose, EscrituraUser user){
         AuthenticationCode mostRecentCode = user.getMostRecentCode();
         Message message = new Message(
@@ -24,8 +28,7 @@ public class MqProducer {
                 mostRecentCode.getCode().toString()
         );
         try {
-            rabbitTemplate.convertAndSend(mqProps.topic, mqProps.key, message);
-            logger.info(String.format("Message sent -> %s", message.email()));
+            rabbitTemplate.convertAndSend(queue.getName(), message);
         } catch (Exception e) {
             logger.warn(String.format("Message NOT sent -> %s", message.email()));
         }
