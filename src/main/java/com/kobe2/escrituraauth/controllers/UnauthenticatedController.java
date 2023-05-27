@@ -2,7 +2,8 @@ package com.kobe2.escrituraauth.controllers;
 
 import com.kobe2.escrituraauth.exceptions.CannedStatementException;
 import com.kobe2.escrituraauth.records.UserRecord;
-import com.kobe2.escrituraauth.services.UnauthenticatedUser;
+import com.kobe2.escrituraauth.services.UnauthenticatedService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -17,18 +18,16 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/api/p")
-public class Public {
+@RequiredArgsConstructor
+public class UnauthenticatedController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass().toString());
-    private final UnauthenticatedUser unauthenticatedUser;
-    public Public(UnauthenticatedUser unauthenticatedUser) {
-        this.unauthenticatedUser = unauthenticatedUser;
-    }
+    private final UnauthenticatedService unauthenticatedService;
     @PostMapping("/sRequest")
     public ResponseEntity<String> sRequest(
             @RequestBody UserRecord userRecord
     ) {
         try {
-            String email = unauthenticatedUser.signupSendConfirmation(userRecord);
+            String email = unauthenticatedService.signupSendConfirmation(userRecord);
             return new ResponseEntity<>(email, HttpStatus.OK);
         }  catch (Exception e) {
             logger.warn(e.getMessage());
@@ -40,7 +39,7 @@ public class Public {
             @PathVariable UUID code
     ) {
         try {
-            String email = unauthenticatedUser.signupSaveUser(code);
+            String email = unauthenticatedService.signupSaveUser(code);
             return new ResponseEntity<>(email, HttpStatus.OK);
         }  catch (Exception e) {
             logger.warn(e.getMessage());
@@ -52,7 +51,7 @@ public class Public {
             @RequestBody UserRecord userRecord
     ) {
         try {
-            String email = unauthenticatedUser.loginUser(userRecord);
+            String email = unauthenticatedService.loginUser(userRecord);
             return new ResponseEntity<>(email, HttpStatus.OK);
         } catch (Exception e) {
             logger.warn(e.getMessage());

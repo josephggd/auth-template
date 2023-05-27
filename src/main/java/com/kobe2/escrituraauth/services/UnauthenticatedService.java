@@ -22,10 +22,10 @@ import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
-public class UnauthenticatedUser {
+public class UnauthenticatedService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     @NonNull
-    private final UserService userService;
+    private final BasicUserService basicUserService;
     @NonNull
     private final UserRepository userRepository;
     @NonNull
@@ -119,7 +119,7 @@ public class UnauthenticatedUser {
                 throw new IllegalArgumentException("CODE IS EXPIRED");
             } else {
                 UUID userId = cCode.getUser().getId();
-                EscrituraUser user = userService.findById(userId);
+                EscrituraUser user = basicUserService.findById(userId);
                 user.setEnabled(true);
                 EscrituraUser savedUser = userRepository.save(user);
                 return savedUser.getEmail();

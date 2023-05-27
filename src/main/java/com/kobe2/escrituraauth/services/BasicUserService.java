@@ -10,9 +10,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@RequiredArgsConstructor
 @Service
-public class UserService {
+@RequiredArgsConstructor
+public class BasicUserService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final UserRepository userRepository;
 
