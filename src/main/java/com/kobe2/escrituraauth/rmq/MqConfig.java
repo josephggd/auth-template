@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class Config {
+public class MqConfig {
     private final MqProps mqProps;
     @Bean
     public Queue queue() {

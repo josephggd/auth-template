@@ -7,14 +7,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Controller
-@RequestMapping("/api/p")
 @RequiredArgsConstructor
 public class UnauthenticatedController {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
@@ -49,18 +51,6 @@ public class UnauthenticatedController {
     ) {
         try {
             unauthenticatedService.loginUser(userRecord);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, e.getMessage());
-            throw new CannedStatementException();
-        }
-    }
-    @PostMapping("/fgp")
-    public ResponseEntity<String> loginForgotPass(
-            @RequestParam String emailWithoutPass
-    ) {
-        try {
-            unauthenticatedService.loginSendForgotPass(emailWithoutPass);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage());

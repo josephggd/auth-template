@@ -16,8 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @ConditionalOnProperty(name="security.enabled", havingValue = "false")
 public class DevConfig {
     @Bean
-    public PasswordEncoder encoder() { return new BCryptPasswordEncoder(); }
-    @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
         https.authorizeHttpRequests(auth-> auth
                 .requestMatchers("/**")

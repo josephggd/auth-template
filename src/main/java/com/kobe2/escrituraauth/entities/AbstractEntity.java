@@ -17,6 +17,4 @@ public class AbstractEntity {
     private UUID id;
     @CreatedDate
     private LocalDate created;
-
-
 }

@@ -1,7 +1,7 @@
 package com.kobe2.escrituraauth.services;
 
+import com.kobe2.escrituraauth.entities.ConfirmationToken;
 import com.kobe2.escrituraauth.entities.EscrituraUser;
-import com.kobe2.escrituraauth.enums.CodePurpose;
 import com.kobe2.escrituraauth.records.UserRecord;
 import com.kobe2.escrituraauth.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 public class UnauthenticatedService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationCodeService authenticationCodeService;
+    private final ConfirmationTokenService confirmationTokenService;
     private final UnauthenticatedRoleService unauthenticatedRoleService;
     private final BasicUserService basicUserService;
     private final UserRepository userRepository;
@@ -38,12 +38,13 @@ public class UnauthenticatedService {
         } catch (UsernameNotFoundException e) {
             unconfirmedUser = new EscrituraUser(email, encodedPw);
         }
-        EscrituraUser userWithUserCode = authenticationCodeService.addNewCode(unconfirmedUser, CodePurpose.CONFIRMATION);
-        mqProducer.sendConfirmationCode(userWithUserCode);
+        ConfirmationToken confirmationToken = confirmationTokenService.addNewToken(unconfirmedUser);
+        userRepository.save(unconfirmedUser);
+        mqProducer.sendConfirmationCode(unconfirmedUser, confirmationToken);
     }
     public void signupConfirmUser(UUID emailCode) throws UsernameNotFoundException {
         logger.log(Level.FINEST, "signupSaveUser");
-        EscrituraUser requestingUser = authenticationCodeService.cCodeCheck(emailCode);
+        EscrituraUser requestingUser = confirmationTokenService.cCodeCheck(emailCode);
         EscrituraUser userWithUserRole = unauthenticatedRoleService.setRoleAsUser(requestingUser);
         userRepository.save(userWithUserRole);
     }
@@ -66,11 +67,5 @@ public class UnauthenticatedService {
             }
             throw new IllegalArgumentException("LOGIN ISSUE");
         }
-    }
-    public void loginSendForgotPass(String email) {
-        logger.log(Level.FINEST, "loginSendForgotPass");
-        EscrituraUser user = basicUserService.findByEmail(email);
-        EscrituraUser userWithUserCode = authenticationCodeService.addNewCode(user, CodePurpose.FORGOT);
-        mqProducer.sendForgotPass(userWithUserCode);
     }
 }
