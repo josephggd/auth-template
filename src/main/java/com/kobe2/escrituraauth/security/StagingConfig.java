@@ -19,7 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @PropertySource("classpath:application-staging.properties")
 @ConditionalOnProperty(name="custom.security.enabled", havingValue = "true")
 public class StagingConfig {
-    @Value("${server.port}")
+    @Value("${custom.locs.port}")
     private String port;
     @Bean
     public WebClient webClient() {

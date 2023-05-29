@@ -18,7 +18,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @PropertySource("classpath:application-dev.properties")
 @ConditionalOnProperty(name="custom.security.enabled", havingValue = "false")
 public class DevConfig {
-    @Value("${server.port}")
+    @Value("${custom.locs.port}")
     private String port;
     @Bean
     public WebClient webClient() {
