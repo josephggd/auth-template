@@ -7,16 +7,28 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @RequiredArgsConstructor
+@PropertySource("classpath:application.properties")
 public class MqConfig {
-    private final MqProps mqProps;
+    @Value("${custom.mq.virtualHost}")
+    public String virtualHost;
+    @Value("${custom.mq.host}")
+    public String host;
+    @Value("${custom.mq.username}")
+    public String username;
+    @Value("${custom.mq.password}")
+    public String password;
+    @Value("${custom.mq.queue}")
+    public String queue;
     @Bean
-    public Queue queue() {
-        return new Queue(mqProps.queue);
+    public Queue mqQueue() {
+        return new Queue(this.queue);
     }
     @Bean
     public MqProducer sender() {
@@ -29,10 +41,10 @@ public class MqConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        connectionFactory.setVirtualHost(mqProps.virtualHost);
-        connectionFactory.setHost(mqProps.host);
-        connectionFactory.setUsername(mqProps.username);
-        connectionFactory.setPassword(mqProps.password);
+        connectionFactory.setVirtualHost(this.virtualHost);
+        connectionFactory.setHost(this.host);
+        connectionFactory.setUsername(this.username);
+        connectionFactory.setPassword(this.password);
         return connectionFactory.getRabbitConnectionFactory();
     }
 }
