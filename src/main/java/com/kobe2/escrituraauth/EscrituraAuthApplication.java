@@ -8,7 +8,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-@PropertySource("classpath:application-dev.properties")
 public class EscrituraAuthApplication {
     @Bean
     public PasswordEncoder encoder() { return new BCryptPasswordEncoder(); }
