@@ -16,14 +16,6 @@ import org.springframework.context.annotation.PropertySource;
 @RequiredArgsConstructor
 @PropertySource("classpath:application.properties")
 public class MqConfig {
-    @Value("${custom.mq.virtualHost}")
-    public String virtualHost;
-    @Value("${custom.mq.host}")
-    public String host;
-    @Value("${custom.mq.username}")
-    public String username;
-    @Value("${custom.mq.password}")
-    public String password;
     @Value("${custom.mq.queue}")
     public String queue;
     @Bean
@@ -41,10 +33,6 @@ public class MqConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        connectionFactory.setVirtualHost(this.virtualHost);
-        connectionFactory.setHost(this.host);
-        connectionFactory.setUsername(this.username);
-        connectionFactory.setPassword(this.password);
         return connectionFactory.getRabbitConnectionFactory();
     }
 }
