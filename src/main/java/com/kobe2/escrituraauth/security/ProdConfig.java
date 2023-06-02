@@ -1,5 +1,7 @@
 package com.kobe2.escrituraauth.security;
 
+import com.kobe2.escrituraauth.services.AccessTokenService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +20,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 @PropertySource("classpath:application-prod.properties")
 @ConditionalOnProperty(name="custom.security.enabled", havingValue = "true")
 public class ProdConfig {
+    @Autowired
+    AccessTokenService svc; // TODO: replace with BOTH services access/refresh
+
     @Value("${custom.locs.port}")
     private String port;
     @Bean
@@ -30,8 +35,12 @@ public class ProdConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
         https.authorizeHttpRequests(auth-> auth
-                .requestMatchers("/**")
+                .requestMatchers("a/**")
                 .permitAll());
+        https.securityMatcher("u2/**")
+                .addFilter(new UsernamePasswordFilter());
+        https.securityMatcher("u1/**")
+                .addFilter(new OnceTokenFilter(this.svc));
         https.formLogin(AbstractHttpConfigurer::disable);
         https.httpBasic(AbstractHttpConfigurer::disable);
         https.csrf(AbstractHttpConfigurer::disable);

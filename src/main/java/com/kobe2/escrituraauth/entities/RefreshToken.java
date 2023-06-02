@@ -8,15 +8,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-public class ConfirmationToken extends AbstractToken {
-    public ConfirmationToken(
+public class RefreshToken extends AbstractToken {
+    public RefreshToken(
             EscrituraUser user
     ){
-        super(24L);
+        super(12L);
         this.user = user;
     }
-    public ConfirmationToken() {
-        super(24L);
+    public RefreshToken() {
+        super(12L);
     }
     @OneToOne
     private EscrituraUser user;

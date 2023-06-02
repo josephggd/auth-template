@@ -5,6 +5,8 @@ import com.kobe2.escrituraauth.entities.EscrituraUser;
 import com.kobe2.escrituraauth.records.UserRecord;
 import com.kobe2.escrituraauth.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,7 @@ import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
-public class UnauthenticatedService {
+public class UnauthenticatedService implements UserDetailsService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
@@ -38,13 +40,24 @@ public class UnauthenticatedService {
         } catch (UsernameNotFoundException e) {
             unconfirmedUser = new EscrituraUser(email, encodedPw);
         }
-        ConfirmationToken confirmationToken = confirmationTokenService.addNewToken(unconfirmedUser);
+        ConfirmationToken confirmationToken = this.addNewToken(unconfirmedUser);
         userRepository.save(unconfirmedUser);
         mqProducer.sendConfirmationCode(unconfirmedUser, confirmationToken);
     }
+    public ConfirmationToken addNewToken(EscrituraUser user) {
+        try {
+            ConfirmationToken token = user.getCToken();
+            confirmationTokenService.revokeToken(token);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "NO CONFIRMATION CODE");
+        }
+        ConfirmationToken newToken = new ConfirmationToken(user);
+        return confirmationTokenService.save(newToken);
+    }
     public void signupConfirmUser(UUID emailCode) throws UsernameNotFoundException {
         logger.log(Level.FINEST, "signupSaveUser");
-        EscrituraUser requestingUser = confirmationTokenService.cCodeCheck(emailCode);
+        ConfirmationToken token = confirmationTokenService.cCodeCheck(emailCode);
+        EscrituraUser requestingUser = token.getUser();
         EscrituraUser userWithUserRole = unauthenticatedRoleService.setRoleAsUser(requestingUser);
         userRepository.save(userWithUserRole);
     }
@@ -67,5 +80,10 @@ public class UnauthenticatedService {
             }
             throw new IllegalArgumentException("LOGIN ISSUE");
         }
+    }
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        EscrituraUser user = basicUserService.findByEmail(username);
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPw(), user.getRoles());
     }
 }

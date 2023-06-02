@@ -14,10 +14,10 @@ import java.util.logging.Logger;
 public class AuthenticatedService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final WebClient client;
-    public Flux<LocationRecord> getLocationsViaClient(String email) {
+    public Flux<LocationRecord> getLocationsViaClient() {
         logger.log(Level.FINE, "getLocationsViaClient");
         return client.get()
-                .uri("/employees")
+                .uri("l/all")
                 .retrieve()
                 .bodyToFlux(LocationRecord.class);
     }

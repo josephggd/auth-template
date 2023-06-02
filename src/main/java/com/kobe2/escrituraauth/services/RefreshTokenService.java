@@ -1,7 +1,7 @@
 package com.kobe2.escrituraauth.services;
 
-import com.kobe2.escrituraauth.entities.ConfirmationToken;
-import com.kobe2.escrituraauth.repositories.ConfirmationTokenRepository;
+import com.kobe2.escrituraauth.entities.RefreshToken;
+import com.kobe2.escrituraauth.repositories.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,30 +12,31 @@ import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
-public class ConfirmationTokenService {
-    private final ConfirmationTokenRepository confirmationTokenRepository;
+public class RefreshTokenService {
+    private final RefreshTokenRepository refreshTokenRepository;
     private final Logger logger = Logger.getLogger(this.getClass().toString());
-    public ConfirmationToken findByCode(UUID uuid) {
-        Optional<ConfirmationToken> abstractToken = confirmationTokenRepository.findByCode(uuid);
+    public RefreshToken findByCode(UUID uuid) {
+        Optional<RefreshToken> abstractToken = refreshTokenRepository.findByCode(uuid);
         if (abstractToken.isPresent()){
             return abstractToken.get();
         } else {
             throw new IllegalArgumentException("CODE NOT FOUND");
         }
     }
-    public void revokeToken(ConfirmationToken token){
+    public void revokeToken(RefreshToken token){
         logger.log(Level.FINEST, "revokeToken");
-        confirmationTokenRepository.delete(token);
+        refreshTokenRepository.delete(token);
     }
-    public ConfirmationToken save(ConfirmationToken token) {
-        return confirmationTokenRepository.save(token);
+    public RefreshToken save(RefreshToken token) {
+        return refreshTokenRepository.save(token);
     }
-    public ConfirmationToken cCodeCheck(UUID code) {
+    public RefreshToken cCodeCheck(UUID code) {
         logger.log(Level.FINEST, "cCodeCheck");
-        ConfirmationToken token = this.findByCode(code);
+        RefreshToken token = this.findByCode(code);
         if (token.isExpired()){
             throw new IllegalArgumentException("CODE IS EXPIRED");
         }
         return token;
     }
+
 }
