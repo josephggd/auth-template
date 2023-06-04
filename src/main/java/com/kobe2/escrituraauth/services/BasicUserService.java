@@ -25,8 +25,8 @@ public class BasicUserService {
             throw new IllegalArgumentException("USER ID NOT FOUND");
         }
     }
-    public EscrituraUser findByEmail(String email) {
-        Optional<EscrituraUser> byEmail = userRepository.findByEmail(email);
+    public EscrituraUser findByEmail(String email) throws UsernameNotFoundException {
+        Optional<EscrituraUser> byEmail = userRepository.findByUsername(email);
         if (byEmail.isEmpty()) {
             throw new UsernameNotFoundException("EMAIL NOT FOUND");
         }

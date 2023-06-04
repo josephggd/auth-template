@@ -21,7 +21,7 @@ public class AnonymousController {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final UnauthenticatedService unauthenticatedService;
     @PostMapping("a/s/r")
-    public ResponseEntity<String> sRequest(
+    public ResponseEntity<String> signupRequest(
             @RequestBody UserRecord userRecord
     ) {
         try {
@@ -33,7 +33,7 @@ public class AnonymousController {
         }
     }
     @PostMapping("a/s/c/{code}")
-    public ResponseEntity<String> sConfirm(
+    public ResponseEntity<String> signupConfirm(
             @PathVariable UUID code
     ) {
         try {

@@ -16,9 +16,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class EscrituraUser extends AbstractEntity{
     @NonNull
-    private String email;
+    private String username;
     @NonNull
-    private String pw;
+    private String password;
     @OneToOne
     private ConfirmationToken cToken;
     @ManyToMany

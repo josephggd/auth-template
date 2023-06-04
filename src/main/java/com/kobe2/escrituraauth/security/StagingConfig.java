@@ -1,24 +1,31 @@
 package com.kobe2.escrituraauth.security;
 
-import com.kobe2.escrituraauth.enums.Authority;
+import com.kobe2.escrituraauth.services.AccessTokenService;
+import com.kobe2.escrituraauth.services.RefreshTokenService;
+import com.kobe2.escrituraauth.services.UnauthenticatedService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @EnableWebSecurity
 @PropertySource("classpath:application-staging.properties")
-@ConditionalOnProperty(name="custom.security.enabled", havingValue = "true")
+@Profile("staging")
 public class StagingConfig {
+
     @Value("${custom.locs.port}")
     private String port;
     @Bean
@@ -29,14 +36,14 @@ public class StagingConfig {
                 .build();
     }
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity https, UnauthenticatedService unauthenticatedService) throws Exception {
         https.authorizeHttpRequests(auth-> auth
-                .requestMatchers("/swagger-ui/**").permitAll()
-                .requestMatchers("/m/**")
-                .hasAuthority(Authority.MAINTAINER.toString())
-                .requestMatchers("/p/**")
-                .hasAuthority(Authority.USER.toString())
-        );
+                .requestMatchers("a/**")
+                .permitAll());
+        https.securityMatcher("u2/**")
+                .addFilter(new UsernamePasswordFilter(unauthenticatedService));
+        https.securityMatcher("u1/**")
+                .addFilter(new OnceTokenFilter(unauthenticatedService));
         https.formLogin(AbstractHttpConfigurer::disable);
         https.httpBasic(AbstractHttpConfigurer::disable);
         https.csrf(AbstractHttpConfigurer::disable);

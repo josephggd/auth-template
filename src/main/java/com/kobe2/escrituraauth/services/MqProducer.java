@@ -22,7 +22,7 @@ public class MqProducer {
     private Queue queue;
     private void sendMessage(CodePurpose purpose, EscrituraUser user, ConfirmationToken token){
         Message message = new Message(
-                user.getEmail(),
+                user.getUsername(),
                 purpose,
                 token.getCode().toString()
         );

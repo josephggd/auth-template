@@ -1,0 +1,124 @@
+version: '2.2'
+services:
+  rabbitmq-ms:
+    image: rabbitmq:management
+    container_name: rabbitmq-ms
+    environment:
+      ENV: 'ENV'
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    secrets:
+      [MQ_QUEUE,
+      MQ_TOPIC,
+      MQ_VIRTUAL_HOST,
+      MQ_HOST,
+      MQ_USERNAME,
+      MQ_PASSWORD]
+  auth-db-ms:
+    container_name: auth-db-ms
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      ENV: 'ENV'
+    ports:
+      - '5432:5432'
+#    volumes:
+#      - auth-db:/var/lib/postgresql/data
+    secrets:
+      [AUTH_PG_HOST,
+      AUTH_PG_PORT,
+      AUTH_PG_DATABASE,
+      AUTH_PG_USER,
+      AUTH_PG_PW]
+
+  auth-api-ms:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: auth-api
+    depends_on: [auth-db-ms, rabbitmq-ms]
+    ports:
+      - "5672:5672"
+      - '443:443'
+    environment:
+      ENV: 'ENV'
+    secrets:
+      [AUTH_PG_HOST,
+      AUTH_PG_PORT,
+      AUTH_PG_DATABASE,
+      AUTH_PG_USER,
+      AUTH_PG_PW,
+
+      AUTH_SPRING_USERNAME,
+      AUTH_SPRING_PASSWORD,
+      AUTH_PLATFORM_CODE,
+      AUTH_LINK_CODE,
+      AUTH_PW_CODE,
+      AUTH_DATABASE_DRIVER,
+      AUTH_DATABASE_PLATFORM,
+
+      AUTH_MQ_QUEUE,
+      AUTH_MQ_TOPIC,
+      AUTH_MQ_VIRTUAL_HOST,
+      AUTH_MQ_HOST,
+      AUTH_MQ_USERNAME,
+      AUTH_MQ_PASSWORD]
+secrets:
+  RABBITMQ_DEFAULT_USER:
+    file: .env
+  RABBITMQ_DEFAULT_PASS:
+    file: .env
+
+  AUTH_PG_HOST:
+    file: .env
+  AUTH_PG_PORT:
+    file: .env
+  AUTH_PG_DATABASE:
+    file: .env
+  AUTH_PG_USER:
+    file: .env
+  AUTH_PG_PW:
+    file: .env
+
+  AUTH_SPRING_USERNAME:
+    file: .env
+  AUTH_SPRING_PASSWORD:
+    file: .env
+  AUTH_PLATFORM_CODE:
+    file: .env
+  AUTH_LINK_CODE:
+    file: .env
+  AUTH_PW_CODE:
+    file: .env
+  AUTH_DATABASE_DRIVER:
+    file: .env
+  AUTH_DATABASE_PLATFORM:
+    file: .env
+
+  AUTH_MQ_QUEUE:
+    file: .env
+  AUTH_MQ_TOPIC:
+    file: .env
+  AUTH_MQ_VIRTUAL_HOST:
+    file: .env
+  AUTH_MQ_HOST:
+    file: .env
+  AUTH_MQ_USERNAME:
+    file: .env
+  AUTH_MQ_PASSWORD:
+    file: .env
+
+  MQ_QUEUE:
+    file: .env
+  MQ_TOPIC:
+    file: .env
+  MQ_VIRTUAL_HOST:
+    file: .env
+  MQ_HOST:
+    file: .env
+  MQ_USERNAME:
+    file: .env
+  MQ_PASSWORD:
+    file: .env
+

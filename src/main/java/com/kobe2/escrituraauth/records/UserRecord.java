@@ -1,4 +1,4 @@
 package com.kobe2.escrituraauth.records;
 
-public record UserRecord(String email, String pw) {
+public record UserRecord(String username, String password) {
 }
