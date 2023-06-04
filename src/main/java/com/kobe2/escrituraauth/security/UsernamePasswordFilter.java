@@ -5,15 +5,12 @@ import com.kobe2.escrituraauth.services.UnauthenticatedService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
-import java.util.logging.Level;
 
 @RequiredArgsConstructor
 public class UsernamePasswordFilter extends UsernamePasswordAuthenticationFilter {
