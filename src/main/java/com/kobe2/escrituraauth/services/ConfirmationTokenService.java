@@ -16,6 +16,7 @@ public class ConfirmationTokenService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     public ConfirmationToken findByCode(UUID uuid) {
+        logger.log(Level.INFO, "findByCode");
         Optional<ConfirmationToken> abstractToken = confirmationTokenRepository.findByCode(uuid);
         if (abstractToken.isPresent()){
             return abstractToken.get();
@@ -23,15 +24,16 @@ public class ConfirmationTokenService {
             throw new IllegalArgumentException("CODE NOT FOUND");
         }
     }
-    public void revokeToken(ConfirmationToken token){
-        logger.log(Level.FINEST, "revokeToken");
-        confirmationTokenRepository.delete(token);
+    public void revokeByUser(UUID userId){
+        logger.log(Level.INFO, "revokeToken");
+        confirmationTokenRepository.deleteAllByUserId(userId);
     }
-    public ConfirmationToken save(ConfirmationToken token) {
-        return confirmationTokenRepository.save(token);
+    public void save(ConfirmationToken token) {
+        logger.log(Level.INFO, "save");
+        confirmationTokenRepository.save(token);
     }
     public ConfirmationToken cCodeCheck(UUID code) {
-        logger.log(Level.FINEST, "cCodeCheck");
+        logger.log(Level.INFO, "cCodeCheck");
         ConfirmationToken token = this.findByCode(code);
         if (token.isExpired()){
             throw new IllegalArgumentException("CODE IS EXPIRED");

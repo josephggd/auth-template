@@ -8,18 +8,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("u2")
 public class UnauthenticatedController {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final UnauthenticatedService unauthenticatedService;
-    @PostMapping("/u2/l")
+    @PostMapping("/l")
     public ResponseEntity<String> login(
             @RequestBody UserRecord userRecord
             ) {
@@ -31,7 +34,7 @@ public class UnauthenticatedController {
                     .headers(headers)
                     .build();
         } catch (Exception e) {
-            logger.log(Level.WARNING, e.getMessage());
+            logger.log(Level.INFO, e.getMessage());
             throw new CannedStatementException();
         }
     }

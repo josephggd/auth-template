@@ -41,9 +41,9 @@ public class UnauthenticatedService implements UserDetailsService {
     private final UnauthenticatedRoleService unauthenticatedRoleService;
     private final BasicUserService basicUserService;
     private final UserRepository userRepository;
-    private final MqProducer mqProducer;
+//    private final MqProducer mqProducer;
     public void signupSendConfirmation(UserRecord userRecord) throws UsernameNotFoundException {
-        logger.log(Level.FINEST, "signupSendConfirmation");
+        logger.log(Level.INFO, "signupSendConfirmation");
         String email = userRecord.username();
         String encodedPw = passwordEncoder.encode(userRecord.password());
         EscrituraUser unconfirmedUser;
@@ -55,47 +55,35 @@ public class UnauthenticatedService implements UserDetailsService {
         } catch (UsernameNotFoundException e) {
             unconfirmedUser = new EscrituraUser(email, encodedPw);
         }
-        ConfirmationToken confirmationToken = this.addNewToken(unconfirmedUser);
         userRepository.save(unconfirmedUser);
-        mqProducer.sendConfirmationCode(unconfirmedUser, confirmationToken);
+        this.addNewToken(unconfirmedUser);
+//        mqProducer.sendConfirmationCode(unconfirmedUser, confirmationToken);
     }
-    public ConfirmationToken addNewToken(EscrituraUser user) {
+    public void addNewToken(EscrituraUser user) {
         try {
-            ConfirmationToken token = user.getCToken();
-            confirmationTokenService.revokeToken(token);
+            confirmationTokenService.revokeByUser(user.getId());
         } catch (Exception e) {
-            logger.log(Level.WARNING, "NO CONFIRMATION CODE");
+            logger.log(Level.INFO, "NO CONFIRMATION CODE");
         }
         ConfirmationToken newToken = new ConfirmationToken(user);
-        return confirmationTokenService.save(newToken);
+        confirmationTokenService.save(newToken);
     }
     public void signupConfirmUser(UUID emailCode) throws UsernameNotFoundException {
-        logger.log(Level.FINEST, "signupSaveUser");
+        logger.log(Level.INFO, "signupSaveUser");
         ConfirmationToken token = confirmationTokenService.cCodeCheck(emailCode);
         EscrituraUser requestingUser = token.getUser();
-        EscrituraUser userWithUserRole = unauthenticatedRoleService.setRoleAsUser(requestingUser);
-        userRepository.save(userWithUserRole);
+        unauthenticatedRoleService.setRoleAsUser(requestingUser);
     }
     public EscrituraUser loginUser(String username, String password) throws UserPrincipalNotFoundException {
-        logger.log(Level.FINEST, "findByEmailAndPw");
-        String encodedPw = passwordEncoder.encode(password);
-        Optional<EscrituraUser> optional = userRepository.findByUsernameAndPassword(username, encodedPw);
-        if (optional.isPresent()) {
-            EscrituraUser user = optional.get();
-            if (!user.isConfirmed()){
-                throw new IllegalArgumentException("USER NOT CONFIRMED");
-            }
+        logger.log(Level.INFO, "findByEmailAndPw");
+        EscrituraUser user = basicUserService.findByEmail(username);
+        if (passwordEncoder.matches(password, user.getPassword())) {
             return user;
-        } else {
-            basicUserService.findByEmail(username);
-            Optional<EscrituraUser> byPw = userRepository.findByPassword(password);
-            if (byPw.isEmpty()) {
-                throw new UserPrincipalNotFoundException("MISMATCHED CREDS");
-            }
-            throw new IllegalArgumentException("LOGIN ISSUE");
         }
+        throw new UserPrincipalNotFoundException("INCORRECT PW");
     }
     public HttpHeaders setHeaders(EscrituraUser user) {
+        logger.log(Level.INFO, "setHeaders");
         AccessToken accessToken = new AccessToken(user);
         accessTokenService.save(accessToken);
         RefreshToken refreshToken = new RefreshToken(user);
@@ -106,33 +94,38 @@ public class UnauthenticatedService implements UserDetailsService {
         return newSessionHeaders;
     }
     public HttpServletResponse checkOrRefreshHeaders (HttpServletRequest request, HttpServletResponse response) {
-        String refreshString = request.getHeader(REFRESH);
-        UUID refreshUUID = UUID.fromString(refreshString);
-        RefreshToken refreshToken = refreshTokenService.findByCode(refreshUUID);
-        String accessString = request.getHeader(ACCESS);
-        UUID accessUUID = UUID.fromString(accessString);
-        AccessToken accessToken = accessTokenService.findByCode(accessUUID);
+        logger.log(Level.INFO, "checkOrRefreshHeaders");
+        try {
 
-        EscrituraUser refreshUser = refreshToken.getUser();
-        EscrituraUser accessUser = accessToken.getUser();
+            String refreshString = request.getHeader(REFRESH);
+            UUID refreshUUID = UUID.fromString(refreshString);
+            RefreshToken refreshToken = refreshTokenService.findByCode(refreshUUID);
+            String accessString = request.getHeader(ACCESS);
+            UUID accessUUID = UUID.fromString(accessString);
+            AccessToken accessToken = accessTokenService.findByCode(accessUUID);
 
-        if (refreshUser.getId().equals(accessUser.getId())) {
-            if (refreshToken.isExpired()) {
-                throw new NotAuthorizedException("BAD REFRESH");
-            }
-            Enumeration<String> headerNames = request.getHeaderNames();
-            while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
-                response.setHeader(headerName, request.getHeader(headerName));
-            }
-            if (accessToken.isExpired()) {
-                AccessToken newToken = new AccessToken(accessUser);
-                accessTokenService.save(newToken);
-                response.setHeader(ACCESS, newToken.getCode().toString());
+            EscrituraUser refreshUser = refreshToken.getUser();
+            EscrituraUser accessUser = accessToken.getUser();
+
+            if (refreshUser.getId().equals(accessUser.getId())) {
+                if (refreshToken.isExpired()) {
+                    throw new NotAuthorizedException("BAD REFRESH");
+                }
+                Enumeration<String> headerNames = request.getHeaderNames();
+                while (headerNames.hasMoreElements()) {
+                    String headerName = headerNames.nextElement();
+                    response.setHeader(headerName, request.getHeader(headerName));
+                }
+                if (accessToken.isExpired()) {
+                    AccessToken newToken = new AccessToken(accessUser);
+                    accessTokenService.save(newToken);
+                    response.setHeader(ACCESS, newToken.getCode().toString());
+                }
             }
             return response;
+        } catch (Exception e) {
+            throw new NotAuthorizedException("MISMATCHED TOKENS");
         }
-        throw new NotAuthorizedException("MISMATCHED TOKENS");
     }
     public UUID parseSessionToken(String authHeaderWithBearer) {
         String authHeaderWithoutBearer = authHeaderWithBearer.split("Bearer ")[1];
@@ -143,9 +136,6 @@ public class UnauthenticatedService implements UserDetailsService {
     public DecodedJWT decodeJWTFromAuthHeader(String authHeader){
         return JWT.decode(authHeader);
     }
-
-
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         EscrituraUser user = basicUserService.findByEmail(username);

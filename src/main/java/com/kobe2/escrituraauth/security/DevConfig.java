@@ -13,17 +13,20 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 @Configuration
 @EnableWebSecurity
 @PropertySource("classpath:application-dev.properties")
 @Profile("dev")
 public class DevConfig {
-
-
+    private final Logger logger = Logger.getLogger(this.getClass().toString());
     @Value("${custom.locs.port}")
     private String port;
     @Bean
     public WebClient webClient() {
+        logger.log(Level.INFO, "webClient");
         return WebClient.builder()
                 .baseUrl(String.format("http://localhost:%s", this.port))
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "SECRETVAR")
@@ -31,8 +34,9 @@ public class DevConfig {
     }
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
+        logger.log(Level.INFO, "securityFilterChain");
         https.authorizeHttpRequests(auth-> auth
-                .requestMatchers("/**")
+                .requestMatchers("**")
                 .permitAll());
         https.formLogin(AbstractHttpConfigurer::disable);
         https.httpBasic(AbstractHttpConfigurer::disable);
@@ -42,6 +46,6 @@ public class DevConfig {
     }
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers("/**");
+        return web -> web.ignoring().requestMatchers("**");
     }
 }

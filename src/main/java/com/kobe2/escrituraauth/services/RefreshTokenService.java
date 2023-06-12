@@ -24,14 +24,14 @@ public class RefreshTokenService {
         }
     }
     public void revokeToken(RefreshToken token){
-        logger.log(Level.FINEST, "revokeToken");
+        logger.log(Level.INFO, "revokeToken");
         refreshTokenRepository.delete(token);
     }
     public RefreshToken save(RefreshToken token) {
         return refreshTokenRepository.save(token);
     }
     public RefreshToken cCodeCheck(UUID code) {
-        logger.log(Level.FINEST, "cCodeCheck");
+        logger.log(Level.INFO, "cCodeCheck");
         RefreshToken token = this.findByCode(code);
         if (token.isExpired()){
             throw new IllegalArgumentException("CODE IS EXPIRED");

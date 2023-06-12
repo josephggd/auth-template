@@ -17,7 +17,7 @@ public class BasicUserService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final UserRepository userRepository;
     public EscrituraUser findById(UUID id){
-        logger.log(Level.FINEST, "findById");
+        logger.log(Level.INFO, "findById");
         Optional<EscrituraUser> optional = userRepository.findById(id);
         if (optional.isPresent()) {
             return optional.get();

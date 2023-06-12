@@ -25,14 +25,14 @@ public class AccessTokenService {
         }
     }
     public void revokeToken(AccessToken token){
-        logger.log(Level.FINEST, "revokeToken");
+        logger.log(Level.INFO, "revokeToken");
         accessTokenRepository.delete(token);
     }
     public AccessToken save(AccessToken token) {
         return accessTokenRepository.save(token);
     }
     public AccessToken cCodeCheck(UUID code) {
-        logger.log(Level.FINEST, "cCodeCheck");
+        logger.log(Level.INFO, "cCodeCheck");
         AccessToken token = this.findByCode(code);
         if (token.isExpired()){
             throw new IllegalArgumentException("CODE IS EXPIRED");

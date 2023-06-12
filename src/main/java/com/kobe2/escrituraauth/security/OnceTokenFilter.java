@@ -1,5 +1,6 @@
 package com.kobe2.escrituraauth.security;
 
+import com.kobe2.escrituraauth.exceptions.CannedStatementException;
 import com.kobe2.escrituraauth.services.UnauthenticatedService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,9 +11,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-@Component
 public class OnceTokenFilter extends OncePerRequestFilter {
+    private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final UnauthenticatedService unauthenticatedService;
     public OnceTokenFilter(UnauthenticatedService unauthenticatedService) {
         this.unauthenticatedService = unauthenticatedService;

@@ -4,6 +4,7 @@ import com.kobe2.escrituraauth.enums.Roles;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.util.Set;
@@ -14,13 +15,12 @@ import java.util.Set;
 @RequiredArgsConstructor
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
+@Table(name = "escritura_user")
 public class EscrituraUser extends AbstractEntity{
     @NonNull
     private String username;
     @NonNull
     private String password;
-    @OneToOne
-    private ConfirmationToken cToken;
     @ManyToMany
     private Set<UserRole> roles;
     public boolean isConfirmed() {

@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 public class UnauthenticatedRoleService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final BasicRoleService basicRoleService;
-    public EscrituraUser setRoleAsUser(EscrituraUser user) {
-        logger.log(Level.FINEST, "setRoleAsUser");
-        return basicRoleService.setRole(user, Roles.USER);
-    };
+    public void setRoleAsUser(EscrituraUser user) {
+        logger.log(Level.INFO, "setRoleAsUser");
+        basicRoleService.setRole(user, Roles.USER);
+    }
 }

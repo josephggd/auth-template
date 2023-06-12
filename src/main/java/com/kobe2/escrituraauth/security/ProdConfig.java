@@ -19,8 +19,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @PropertySource("classpath:application-prod.properties")
 @Profile("prod")
 public class ProdConfig {
-
-
     @Value("${custom.locs.port}")
     private String port;
     @Bean

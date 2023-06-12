@@ -14,23 +14,28 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 @Configuration
 @EnableWebSecurity
 @PropertySource("classpath:application-staging.properties")
 @Profile("staging")
 public class StagingConfig {
-
+    private final Logger logger = Logger.getLogger(this.getClass().toString());
     @Value("${custom.locs.port}")
     private String port;
     @Bean
-    public WebClient webClient() {
-        return WebClient.builder()
+    public WebClient webClient(WebClient.Builder webClientBuilder) {
+        logger.log(Level.INFO, "webClient");
+        return webClientBuilder
                 .baseUrl(String.format("http://localhost:%s", this.port))
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "SECRETVAR")
                 .build();
     }
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity https, UnauthenticatedService unauthenticatedService) throws Exception {
+        logger.log(Level.INFO, "securityFilterChain");
         https.authorizeHttpRequests(auth-> auth
                 .requestMatchers("a/**")
                 .permitAll());

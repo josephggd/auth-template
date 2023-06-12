@@ -1,0 +1,6 @@
+FROM eclipse-temurin:17-jdk-alpine
+VOLUME /tmp
+EXPOSE 443
+MAINTAINER kobe2.com
+COPY --from=cleaninstall usr/src/app/target/escritura-auth-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java", "-Dspring.profiles.active=staging", "-jar", "app.jar"]

@@ -16,11 +16,10 @@ import java.util.logging.Logger;
 public class BasicRoleService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final RoleRepository roleRepository;
-    public EscrituraUser setRole(EscrituraUser user, Roles roleName) {
-        logger.log(Level.FINEST, "setRole");
+    public void setRole(EscrituraUser user, Roles roleName) {
+        logger.log(Level.INFO, "setRole");
         UserRole userRole = new UserRole(roleName);
         roleRepository.save(userRole);
         user.setRoles(Set.of(userRole));
-        return user;
     }
 }
