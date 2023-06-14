@@ -1,7 +1,7 @@
 package com.kobe2.escrituraauth.services;
 
-import com.kobe2.escrituraauth.dtos.LocationRecord;
 import com.kobe2.escrituraauth.entities.EscrituraUser;
+import com.kobe2.escrituraauth.records.LocationRecord;
 import com.kobe2.escrituraauth.records.UserRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

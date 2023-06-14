@@ -1,7 +1,7 @@
 package com.kobe2.escrituraauth.services;
 
-import com.kobe2.escrituraauth.dtos.LocationRecord;
 import com.kobe2.escrituraauth.entities.EscrituraUser;
+import com.kobe2.escrituraauth.records.LocationRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package com.kobe2.escrituraauth.controllers;
 
-import com.kobe2.escrituraauth.dtos.LocationRecord;
 import com.kobe2.escrituraauth.exceptions.CannedStatementException;
+import com.kobe2.escrituraauth.records.LocationRecord;
 import com.kobe2.escrituraauth.services.AuthenticatedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

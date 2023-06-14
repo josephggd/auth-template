@@ -1,10 +1,9 @@
 package com.kobe2.escrituraauth.controllers;
 
-import com.kobe2.escrituraauth.dtos.LocationRecord;
 import com.kobe2.escrituraauth.exceptions.CannedStatementException;
+import com.kobe2.escrituraauth.records.LocationRecord;
 import com.kobe2.escrituraauth.records.UserRecord;
 import com.kobe2.escrituraauth.services.AuthenticatedService;
-import com.kobe2.escrituraauth.services.UnauthenticatedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,9 +17,8 @@ import java.util.logging.Logger;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("u2")
-public class UnauthenticatedController {
+public class LoginController {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
-    private final UnauthenticatedService unauthenticatedService;
     private final AuthenticatedService authenticatedService;
     @PostMapping("/l")
     public ResponseEntity<Flux<LocationRecord>> login(
