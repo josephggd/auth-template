@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 @Service
@@ -16,20 +15,12 @@ import java.util.logging.Logger;
 public class BasicUserService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final UserRepository userRepository;
-    public EscrituraUser findById(UUID id){
-        logger.info("findById");
-        Optional<EscrituraUser> optional = userRepository.findById(id);
-        if (optional.isPresent()) {
-            return optional.get();
-        } else {
-            throw new NotAuthorizedException("USER ID NOT FOUND");
-        }
-    }
     public EscrituraUser findByEmail(String email) throws UsernameNotFoundException {
         logger.info("findByEmail");
         Optional<EscrituraUser> byEmail = userRepository.findByUsername(email);
         if (byEmail.isEmpty()) {
-            throw new NotAuthorizedException("EMAIL NOT FOUND");
+            logger.warning("EMAIL NOT FOUND");
+            throw new NotAuthorizedException("BAD AUTH");
         }
         return byEmail.get();
     }

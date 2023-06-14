@@ -28,7 +28,6 @@ public class OnceTokenFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         logger.info("shouldNotFilter");
-        System.out.println(request.getServletPath());
         return excludeUrlPatterns.stream().anyMatch(s -> request.getServletPath().startsWith(s));
     }
 

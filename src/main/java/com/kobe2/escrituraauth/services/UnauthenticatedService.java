@@ -28,8 +28,7 @@ import java.util.logging.Logger;
 @RequiredArgsConstructor
 public class UnauthenticatedService implements UserDetailsService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
-    private final String ACCESS = "SESSION_A";
-    private final String REFRESH = "SESSION_B";
+    private static final String BEARER = "Bearer ";
     @Autowired
     private PasswordEncoder passwordEncoder;
     private final ConfirmationTokenService confirmationTokenService;
@@ -58,10 +57,9 @@ public class UnauthenticatedService implements UserDetailsService {
         try {
             confirmationTokenService.revokeByUser(user.getId());
         } catch (Exception e) {
-            logger.log(Level.INFO, "NO CONFIRMATION CODE");
+            logger.warning("NO CONFIRMATION CODE");
         }
         ConfirmationToken newToken = new ConfirmationToken(user);
-        System.out.println(newToken.getCode());
         confirmationTokenService.save(newToken);
     }
     public void signupConfirmUser(UUID emailCode) throws UsernameNotFoundException {
@@ -77,22 +75,11 @@ public class UnauthenticatedService implements UserDetailsService {
         logger.log(Level.INFO, "loginUser");
         EscrituraUser user = basicUserService.findByEmail(username);
         boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
-        System.out.println("passwordMatches:"+passwordMatches);
         if (passwordMatches && user.isEnabled()) {
             return user;
         }
-        throw new NotAuthorizedException("INCORRECT PW");
-    }
-    public HttpHeaders setHeaders(EscrituraUser user) {
-        logger.log(Level.INFO, "setHeaders");
-        AccessToken accessToken = new AccessToken(user);
-        accessTokenService.save(accessToken);
-        RefreshToken refreshToken = new RefreshToken(user);
-        refreshTokenService.save(refreshToken);
-        HttpHeaders newSessionHeaders = new HttpHeaders();
-        newSessionHeaders.set(REFRESH, refreshToken.getCode().toString());
-        newSessionHeaders.set(ACCESS, accessToken.getCode().toString());
-        return newSessionHeaders;
+        logger.warning("INCORRECT PW");
+        throw new NotAuthorizedException("BAD AUTH");
     }
     public HttpServletResponse setHeaders(EscrituraUser user, HttpServletResponse response) {
         logger.log(Level.INFO, "setHeaders");
@@ -101,41 +88,8 @@ public class UnauthenticatedService implements UserDetailsService {
         AccessToken accessToken = new AccessToken(user);
         accessTokenService.save(accessToken);
         String jwt = jwtService.generateUserToken(refreshToken, accessToken);
-        response.setHeader("Authorization", "Bearer "+jwt);
+        response.setHeader(HttpHeaders.AUTHORIZATION, BEARER +jwt);
         return response;
-    }
-    public HttpServletResponse setRefresh(EscrituraUser user, HttpServletResponse response) {
-        logger.log(Level.INFO, "setRefresh");
-        RefreshToken refreshToken = new RefreshToken(user);
-        refreshTokenService.save(refreshToken);
-        response.setHeader(REFRESH, refreshToken.getCode().toString());
-        return response;
-    }
-    public HttpServletResponse setAccess(EscrituraUser user, HttpServletResponse response) {
-        logger.log(Level.INFO, "setAccess");
-        AccessToken accessToken = new AccessToken(user);
-        accessTokenService.save(accessToken);
-        response.setHeader(ACCESS, accessToken.getCode().toString());
-        return response;
-    }
-    public EscrituraUser getFromRefreshToken(HttpServletRequest request) {
-        logger.info("getFromRefreshToken");
-        String refreshString = request.getHeader(REFRESH);
-        UUID refreshUUID = UUID.fromString(refreshString);
-        RefreshToken refreshToken = refreshTokenService.findByCode(refreshUUID);
-        if (refreshToken.isExpired()) {
-            throw new NotAuthorizedException("BAD REFRESH");
-        } else {
-            refreshToken.extend();
-            refreshTokenService.save(refreshToken);
-            return refreshToken.getUser();
-        }
-    }
-    public AccessToken getAccessTokenFromRequest(HttpServletRequest request) {
-        logger.info("getAccessTokenFromRequest");
-        String accessString = request.getHeader(ACCESS);
-        UUID accessUUID = UUID.fromString(accessString);
-        return accessTokenService.findByCode(accessUUID);
     }
     public HttpServletResponse checkOrRefreshAccess(RefreshToken refreshToken, AccessToken accessToken, HttpServletResponse response) {
         logger.info("checkOrRefreshAccess");
@@ -145,35 +99,29 @@ public class UnauthenticatedService implements UserDetailsService {
             if (accessToken.isExpired()) {
                 AccessToken newToken = new AccessToken(accessUser);
                 accessTokenService.save(newToken);
-                response.setHeader(ACCESS, newToken.getCode().toString());
+                String jwt = jwtService.generateUserToken(refreshToken, newToken);
+                response.setHeader(HttpHeaders.AUTHORIZATION, BEARER +jwt);
             }
             return response;
         } else {
-            throw new NotAuthorizedException("MISMATCHED TOKENS");
+            logger.warning("MISMATCHED TOKENS");
+            throw new NotAuthorizedException("BAD AUTH");
         }
     }
 
     public HttpServletResponse authViaHeaders(HttpServletRequest request, HttpServletResponse response) {
         logger.log(Level.INFO, "checkOrRefreshHeaders");
-//        try {
-            String token = request.getHeader("Authorization").split("Bearer ")[1];
-            System.out.println("token:"+token);
+        try {
+            String token = request.getHeader(HttpHeaders.AUTHORIZATION).split(BEARER)[1];
             UUID refreshTokenId = UUID.fromString(jwtService.extractRefresh(token));
             RefreshToken refreshToken = refreshTokenService.findByCode(refreshTokenId);
             UUID accessTokenId = UUID.fromString(jwtService.extractAccess(token));
             AccessToken accessToken = accessTokenService.findByCode(accessTokenId);
             return this.checkOrRefreshAccess(refreshToken, accessToken, response);
-//        } catch (Exception e) {
-//            throw new NotAuthorizedException("MISMATCHED TOKENS");
-//        }
-    }
-
-    public HttpServletResponse authViaUsernameAndPass(HttpServletRequest request, HttpServletResponse response) throws NotAuthorizedException {
-        String username = (String) request.getAttribute("username");
-        String password = (String) request.getAttribute("password");
-        EscrituraUser user = this.loginUser(username, password);
-        HttpServletResponse newResponse = this.setHeaders(user, response);
-        return setHeaders(user, newResponse);
+        } catch (Exception e) {
+            logger.warning(e.getMessage());
+            throw new NotAuthorizedException("BAD AUTH");
+        }
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

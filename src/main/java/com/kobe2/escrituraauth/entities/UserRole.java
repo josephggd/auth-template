@@ -16,11 +16,6 @@ public class UserRole extends AbstractEntity implements GrantedAuthority {
     @Enumerated(EnumType.ORDINAL)
     private Roles role;
     @ManyToOne
-//    @JoinTable(
-//            name = "user_role_users",
-//            joinColumns = { @JoinColumn(name = "users_id") },
-//            inverseJoinColumns = { @JoinColumn(name = "user_role_id") }
-//    )
     private final EscrituraUser user;
 
     @Override

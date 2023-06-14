@@ -2,6 +2,7 @@ package com.kobe2.escrituraauth.services;
 
 import com.kobe2.escrituraauth.entities.ConfirmationToken;
 import com.kobe2.escrituraauth.repositories.ConfirmationTokenRepository;
+import jakarta.ws.rs.NotAuthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,8 @@ public class ConfirmationTokenService {
         if (abstractToken.isPresent()){
             return abstractToken.get();
         } else {
-            throw new IllegalArgumentException("CODE NOT FOUND");
+            logger.warning("CODE NOT FOUND");
+            throw new IllegalArgumentException("BAD AUTH");
         }
     }
     public void revokeByUser(UUID userId){
@@ -32,15 +34,12 @@ public class ConfirmationTokenService {
         logger.info( "save");
         confirmationTokenRepository.save(token);
     }
-    public void delete(ConfirmationToken token) {
-        logger.info( "delete");
-        confirmationTokenRepository.delete(token);
-    }
     public ConfirmationToken cCodeCheck(UUID code) {
         logger.info( "cCodeCheck");
         ConfirmationToken token = this.findByCode(code);
         if (token.isExpired()){
-            throw new IllegalArgumentException("CODE IS EXPIRED");
+            logger.warning("CODE EXPIRED");
+            throw new NotAuthorizedException("BAD AUTH");
         }
         return token;
     }

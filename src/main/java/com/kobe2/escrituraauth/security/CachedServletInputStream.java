@@ -2,12 +2,15 @@ package com.kobe2.escrituraauth.security;
 
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
+import jakarta.ws.rs.NotAuthorizedException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 public class CachedServletInputStream extends ServletInputStream {
+    private final Logger logger = Logger.getLogger(this.getClass().toString());
     private InputStream cachedInputStream;
 
     public CachedServletInputStream(byte[] cachedBody) {
@@ -16,10 +19,12 @@ public class CachedServletInputStream extends ServletInputStream {
 
     @Override
     public boolean isFinished() {
+        logger.info("isFinished");
         try {
             return cachedInputStream.available() == 0;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.warning(e.getMessage());
+            throw new NotAuthorizedException("BAD AUTH");
         }
     }
 

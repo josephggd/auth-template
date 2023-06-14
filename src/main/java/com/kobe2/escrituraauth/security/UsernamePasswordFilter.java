@@ -28,15 +28,8 @@ public class UsernamePasswordFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         logger.info("shouldNotFilter");
-        System.out.println(request.getServletPath());
         return excludeUrlPatterns.stream().anyMatch(s -> request.getServletPath().startsWith(s));
     }
-//
-//    public UserRecord parseFromRequest(HttpServletRequest request) throws IOException {
-//        byte[] inputBytes = StreamUtils.copyToByteArray(request.getInputStream());
-//        return new ObjectMapper().readValue(inputBytes, UserRecord.class);
-//
-//    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -46,13 +39,10 @@ public class UsernamePasswordFilter extends OncePerRequestFilter {
         EscrituraUser user = unauthenticatedService.loginUser(userRecord.username(), userRecord.password());
         HttpServletResponse newResponse = unauthenticatedService.setHeaders(user, response);
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user, null, user.getRoles());
-        System.out.println("111111111111111111");
         token.setDetails(
                 new WebAuthenticationDetailsSource().buildDetails(wrapper)
         );
-        System.out.println("222222222222222222");
         SecurityContextHolder.getContext().setAuthentication(token);
-        System.out.println("33333333333333333333333");
         filterChain.doFilter(wrapper, newResponse);
     }
 

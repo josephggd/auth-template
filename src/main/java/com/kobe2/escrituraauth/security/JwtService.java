@@ -4,21 +4,24 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.RegisteredClaims;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.kobe2.escrituraauth.entities.AccessToken;
 import com.kobe2.escrituraauth.entities.EscrituraUser;
 import com.kobe2.escrituraauth.entities.RefreshToken;
+import jakarta.ws.rs.NotAuthorizedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 public class JwtService {
+    private final Logger logger = Logger.getLogger(this.getClass().toString());
 
-//    private final Algorithm algorithm =Algorithm.HMAC256(Base64.getDecoder().decode(SECRET));
     private final String ACCESS = "SESSION_A";
     private final String REFRESH = "SESSION_B";
     private String issuer = "SECRETVAR";
@@ -26,37 +29,36 @@ public class JwtService {
     private static final String SECRET = "zZrq0sZK1yt9RJk51RTJ/jeU6WERbvr8nqKMWQJRX1E=";
 
     public String extractUserId(String token) {
+        logger.info("extractUserId");
         Claim claim = verifyToken(token).getClaim(RegisteredClaims.SUBJECT);
         return claim.asString();
     }
     public String extractAccess(String token) {
+        logger.info("extractAccess");
         return extractFromToken(token, ACCESS);
     }
     public String extractRefresh(String token) {
+        logger.info("extractRefresh");
         return extractFromToken(token, REFRESH);
     }
     private String extractFromToken(String token, String claimName) {
+        logger.info("extractFromToken");
         Claim claim = verifyToken(token).getClaim(claimName);
         return claim.asString();
     }
 
     private DecodedJWT verifyToken(String token) {
+        logger.info("verifyToken");
         Algorithm algorithm =Algorithm.HMAC256(Base64.getDecoder().decode(SECRET));
         JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer(issuer)
                 .build();
-        return verifier.verify(token);
-//        try {
-//            return verifier.verify(token);
-//        } catch (JWTVerificationException e) {
-//            System.out.println("JWTVE");
-//            throw new NotAuthorizedException("BAD AUTH");
-//        }
-    }
-
-    private static boolean isJWTExpired(DecodedJWT decodedJWT) {
-        Date expiresAt = decodedJWT.getExpiresAt();
-        return expiresAt.before(new Date());
+        try {
+            return verifier.verify(token);
+        } catch (JWTVerificationException e) {
+            logger.warning(e.getMessage());
+            throw new NotAuthorizedException("BAD AUTH");
+        }
     }
 
     public String generateUserToken(
@@ -65,7 +67,7 @@ public class JwtService {
     ) {
         long millis = System.currentTimeMillis();
         Algorithm algorithm =Algorithm.HMAC256(Base64.getDecoder().decode(SECRET));
-        String token = JWT
+        return JWT
                 .create()
                 .withIssuer(issuer)
                 .withClaim(REFRESH, refreshToken.getCode().toString())
@@ -74,8 +76,6 @@ public class JwtService {
                 .withExpiresAt(new Date(millis + millisAdd))
                 .withJWTId(UUID.randomUUID().toString())
                 .sign(algorithm);
-        System.out.println("TOKEN:"+token);
-        return token;
     }
 
     public String generateApiToken(
