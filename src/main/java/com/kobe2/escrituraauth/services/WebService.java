@@ -1,6 +1,7 @@
 package com.kobe2.escrituraauth.services;
 
 import com.kobe2.escrituraauth.dtos.LocationRecord;
+import com.kobe2.escrituraauth.entities.EscrituraUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,20 @@ public class WebService {
     public Flux<LocationRecord> getLocationsViaClient() {
         logger.info("getLocationsViaClient");
         return client.get()
-                .uri(String.format("http://localhost:%s", this.port))
+                .uri(uriBuilder -> uriBuilder
+                        .host(String.format("http://localhost:%s", this.port))
+                        .path("/all")
+                        .build())
+                .retrieve()
+                .bodyToFlux(LocationRecord.class);
+    }
+    public Flux<LocationRecord> getLocationsViaClient(EscrituraUser escrituraUser) {
+        logger.info("getLocationsViaClient");
+        return client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .host(String.format("http://localhost:%s", this.port))
+                        .queryParam("u", escrituraUser.getId().toString())
+                        .build())
                 .retrieve()
                 .bodyToFlux(LocationRecord.class);
     }

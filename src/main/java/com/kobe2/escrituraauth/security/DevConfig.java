@@ -47,11 +47,14 @@ public class DevConfig {
         https.csrf(AbstractHttpConfigurer::disable);
         https.cors(AbstractHttpConfigurer::disable);
         https.authorizeHttpRequests(auth-> auth
-                .requestMatchers("a/**", "u2/**", "/h2-console")
+                .requestMatchers("a/**", "/h2-console")
                 .permitAll());
+        https.securityMatcher("u2/**")
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(new UsernamePasswordFilter(unauthenticatedService), UsernamePasswordAuthenticationFilter.class);
         https.securityMatcher("u1/**")
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(new OnceTokenFilter(unauthenticatedService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new OnceTokenFilter(unauthenticatedService), UsernamePasswordFilter.class);
         return https.build();
     }
     @Bean

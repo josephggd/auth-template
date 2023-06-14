@@ -156,10 +156,12 @@ public class UnauthenticatedService implements UserDetailsService {
         }
     }
 
-    public EscrituraUser authViaUsernameAndPass(HttpServletRequest request, HttpServletResponse response) throws NotAuthorizedException {
+    public HttpServletResponse authViaUsernameAndPass(HttpServletRequest request, HttpServletResponse response) throws NotAuthorizedException {
         String username = (String) request.getAttribute("username");
         String password = (String) request.getAttribute("password");
-        return this.loginUser(username, password);
+        EscrituraUser user = this.loginUser(username, password);
+        HttpServletResponse newResponse = this.setHeaders(user, response);
+        return setHeaders(user, newResponse);
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
