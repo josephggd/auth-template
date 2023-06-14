@@ -2,7 +2,6 @@ package com.kobe2.escrituraauth.entities;
 
 import com.kobe2.escrituraauth.enums.Roles;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.*;
