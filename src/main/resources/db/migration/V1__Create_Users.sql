@@ -7,39 +7,17 @@ CREATE TABLE escritura_user
     CONSTRAINT pk_escritura_user PRIMARY KEY (id)
 );
 
-CREATE TABLE escritura_user_roles
-(
-    escritura_user_id UUID NOT NULL,
-    roles_id          UUID NOT NULL,
-    CONSTRAINT pk_escritura_user_roles PRIMARY KEY (escritura_user_id, roles_id)
-);
-
-ALTER TABLE escritura_user_roles
-    ADD CONSTRAINT fk_escuserol_on_escritura_user FOREIGN KEY (escritura_user_id) REFERENCES escritura_user (id);
-
 CREATE TABLE user_role
 (
     id      UUID NOT NULL,
     created date,
     role    INTEGER,
-    CONSTRAINT pk_userrole PRIMARY KEY (id)
+    user_id UUID,
+    CONSTRAINT pk_user_role PRIMARY KEY (id)
 );
 
-ALTER TABLE escritura_user_roles
-    ADD CONSTRAINT fk_escuserol_on_user_role FOREIGN KEY (roles_id) REFERENCES user_role (id);
-
-CREATE TABLE user_role_users
-(
-    user_role_id UUID NOT NULL,
-    users_id     UUID NOT NULL,
-    CONSTRAINT pk_userrole_users PRIMARY KEY (user_role_id, users_id)
-);
-
-ALTER TABLE user_role_users
-    ADD CONSTRAINT fk_useroluse_on_escritura_user FOREIGN KEY (users_id) REFERENCES escritura_user (id);
-
-ALTER TABLE user_role_users
-    ADD CONSTRAINT fk_useroluse_on_user_role FOREIGN KEY (user_role_id) REFERENCES user_role (id);
+ALTER TABLE user_role
+    ADD CONSTRAINT FK_USER_ROLE_ON_USER FOREIGN KEY (user_id) REFERENCES escritura_user (id);
 
 CREATE TABLE refresh_token
 (

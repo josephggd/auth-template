@@ -22,4 +22,5 @@ public class RefreshToken extends AbstractToken {
     }
     @OneToOne
     private EscrituraUser user;
+    public void extend() {this.extend(1L);}
 }

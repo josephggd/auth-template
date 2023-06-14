@@ -29,6 +29,7 @@ public class AbstractToken extends AbstractEntity {
     public boolean isExpired(){
         return LocalDateTime.now().isAfter(this.expiration);
     }
+    protected void extend(Long extensionHours) {setExpiration(this.expiration.plusHours(extensionHours));}
     public void revoke(){
         this.setExpiration(LocalDateTime.MIN);
     }

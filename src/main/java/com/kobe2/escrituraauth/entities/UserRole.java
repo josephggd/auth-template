@@ -15,14 +15,15 @@ import java.util.Set;
 @Table(name = "user_role")
 public class UserRole extends AbstractEntity implements GrantedAuthority {
     @NonNull
+    @Enumerated(EnumType.ORDINAL)
     private Roles role;
-    @ManyToMany
-    @JoinTable(
-            name = "user_role_users",
-            joinColumns = { @JoinColumn(name = "users_id") },
-            inverseJoinColumns = { @JoinColumn(name = "user_role_id") }
-    )
-    private Set<EscrituraUser> users;
+    @ManyToOne
+//    @JoinTable(
+//            name = "user_role_users",
+//            joinColumns = { @JoinColumn(name = "users_id") },
+//            inverseJoinColumns = { @JoinColumn(name = "user_role_id") }
+//    )
+    private final EscrituraUser user;
 
     @Override
     public String getAuthority() {

@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,10 +45,7 @@ public class UnauthenticatedService implements UserDetailsService {
         EscrituraUser unconfirmedUser;
         try {
             unconfirmedUser = basicUserService.findByEmail(email);
-            if (unconfirmedUser.isConfirmed()){
-                throw new IllegalArgumentException("USER ALREADY CONFIRMED");
-            }
-        } catch (UsernameNotFoundException e) {
+        } catch (NotAuthorizedException e) {
             unconfirmedUser = new EscrituraUser(email, encodedPw);
         }
         userRepository.save(unconfirmedUser);
@@ -68,14 +66,17 @@ public class UnauthenticatedService implements UserDetailsService {
         logger.log(Level.INFO, "signupSaveUser");
         ConfirmationToken token = confirmationTokenService.cCodeCheck(emailCode);
         EscrituraUser requestingUser = token.getUser();
-        unauthenticatedRoleService.setRoleAsUser(requestingUser);
-        confirmationTokenService.delete(token);
+        EscrituraUser user = unauthenticatedRoleService.setRoleAsUser(requestingUser);
+        basicUserService.save(user);
+        token.setExpiration(LocalDateTime.MIN);
+        confirmationTokenService.save(token);
     }
     public EscrituraUser loginUser(String username, String password) throws NotAuthorizedException {
-        logger.log(Level.INFO, "findByEmailAndPw");
+        logger.log(Level.INFO, "loginUser");
         EscrituraUser user = basicUserService.findByEmail(username);
         boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
-        if (passwordMatches && user.isConfirmed()) {
+        System.out.println("passwordMatches:"+passwordMatches);
+        if (passwordMatches && user.isEnabled()) {
             return user;
         }
         throw new NotAuthorizedException("INCORRECT PW");
@@ -118,6 +119,8 @@ public class UnauthenticatedService implements UserDetailsService {
         if (refreshToken.isExpired()) {
             throw new NotAuthorizedException("BAD REFRESH");
         } else {
+            refreshToken.extend();
+            refreshTokenService.save(refreshToken);
             return refreshToken.getUser();
         }
     }
@@ -160,7 +163,6 @@ public class UnauthenticatedService implements UserDetailsService {
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        EscrituraUser user = basicUserService.findByEmail(username);
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), user.getRoles());
+        return basicUserService.findByEmail(username);
     }
 }

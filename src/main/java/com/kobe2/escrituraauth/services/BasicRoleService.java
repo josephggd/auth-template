@@ -7,6 +7,7 @@ import com.kobe2.escrituraauth.repositories.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,10 +17,13 @@ import java.util.logging.Logger;
 public class BasicRoleService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final RoleRepository roleRepository;
-    public void setRole(EscrituraUser user, Roles roleName) {
+    public EscrituraUser setRole(EscrituraUser user, Roles roleName) {
         logger.log(Level.INFO, "setRole");
-        UserRole userRole = new UserRole(roleName);
+        UserRole userRole = new UserRole(roleName, user);
         roleRepository.save(userRole);
-        user.setRoles(Set.of(userRole));
+        Set<UserRole> currentRoles = user.getRoles();
+        currentRoles.add(userRole);
+        user.setRoles(currentRoles);
+        return user;
     }
 }
