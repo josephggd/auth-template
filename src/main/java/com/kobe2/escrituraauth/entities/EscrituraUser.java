@@ -3,7 +3,6 @@ package com.kobe2.escrituraauth.entities;
 import com.kobe2.escrituraauth.enums.Roles;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.*;
 
@@ -21,7 +20,7 @@ public class EscrituraUser extends AbstractEntity{
     private String username;
     @NonNull
     private String password;
-    @ManyToMany
+    @ManyToMany(mappedBy = "users")
     private Set<UserRole> roles;
     public boolean isConfirmed() {
         return this.roles.stream().anyMatch(p->p.getRole().equals(Roles.USER));

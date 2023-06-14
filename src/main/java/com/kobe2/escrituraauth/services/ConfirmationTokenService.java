@@ -29,11 +29,15 @@ public class ConfirmationTokenService {
         confirmationTokenRepository.deleteAllByUserId(userId);
     }
     public void save(ConfirmationToken token) {
-        logger.log(Level.INFO, "save");
+        logger.info( "save");
         confirmationTokenRepository.save(token);
     }
+    public void delete(ConfirmationToken token) {
+        logger.info( "delete");
+        confirmationTokenRepository.delete(token);
+    }
     public ConfirmationToken cCodeCheck(UUID code) {
-        logger.log(Level.INFO, "cCodeCheck");
+        logger.info( "cCodeCheck");
         ConfirmationToken token = this.findByCode(code);
         if (token.isExpired()){
             throw new IllegalArgumentException("CODE IS EXPIRED");

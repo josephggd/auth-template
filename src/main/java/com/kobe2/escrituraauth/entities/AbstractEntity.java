@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -17,12 +17,15 @@ public class AbstractEntity {
     @Id
     private UUID id;
     @CreatedDate
-    private LocalDate created;
+    private LocalDateTime created;
 
     @PrePersist
     public void save(){
         if (this.id==null) {
             this.id = UUID.randomUUID();
+        }
+        if (this.created==null) {
+            this.created = LocalDateTime.now();
         }
     }
 }

@@ -1,9 +1,7 @@
 package com.kobe2.escrituraauth.entities;
 
 import com.kobe2.escrituraauth.enums.Roles;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -19,6 +17,11 @@ public class UserRole extends AbstractEntity implements GrantedAuthority {
     @NonNull
     private Roles role;
     @ManyToMany
+    @JoinTable(
+            name = "user_role_users",
+            joinColumns = { @JoinColumn(name = "users_id") },
+            inverseJoinColumns = { @JoinColumn(name = "user_role_id") }
+    )
     private Set<EscrituraUser> users;
 
     @Override

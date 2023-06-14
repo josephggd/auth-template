@@ -1,5 +1,6 @@
 package com.kobe2.escrituraauth.security;
 
+import com.kobe2.escrituraauth.services.UnauthenticatedService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,11 +34,15 @@ public class DevConfig {
                 .build();
     }
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity https, UnauthenticatedService unauthenticatedService) throws Exception {
         logger.log(Level.INFO, "securityFilterChain");
         https.authorizeHttpRequests(auth-> auth
-                .requestMatchers("**")
+                .requestMatchers("a/**")
                 .permitAll());
+        https.securityMatcher("u2/**")
+                .addFilter(new UsernamePasswordFilter(unauthenticatedService));
+        https.securityMatcher("u1/**")
+                .addFilterBefore(new OnceTokenFilter(unauthenticatedService), UsernamePasswordFilter.class);
         https.formLogin(AbstractHttpConfigurer::disable);
         https.httpBasic(AbstractHttpConfigurer::disable);
         https.csrf(AbstractHttpConfigurer::disable);

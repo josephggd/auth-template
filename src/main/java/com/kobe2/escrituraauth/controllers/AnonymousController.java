@@ -7,10 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Controller
@@ -27,7 +29,7 @@ public class AnonymousController {
             unauthenticatedService.signupSendConfirmation(userRecord);
             return new ResponseEntity<>(HttpStatus.OK);
         }  catch (Exception e) {
-            logger.log(Level.INFO, e.getMessage());
+            logger.warning(e.getMessage());
             throw new CannedStatementException();
         }
     }
@@ -39,7 +41,7 @@ public class AnonymousController {
             unauthenticatedService.signupConfirmUser(code);
             return new ResponseEntity<>(HttpStatus.OK);
         }  catch (Exception e) {
-            logger.log(Level.INFO, e.getMessage());
+            logger.warning(e.getMessage());
             throw new CannedStatementException();
         }
     }
