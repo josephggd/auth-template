@@ -40,7 +40,11 @@ public class DevConfig {
                 .build();
     }
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity https, UnauthenticatedService unauthenticatedService) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity https,
+            UnauthenticatedService unauthenticatedService,
+            JwtService jwtService
+    ) throws Exception {
         logger.log(Level.INFO, "securityFilterChain");
         https.formLogin(AbstractHttpConfigurer::disable);
         https.httpBasic(AbstractHttpConfigurer::disable);
@@ -54,7 +58,7 @@ public class DevConfig {
                 .addFilterBefore(new UsernamePasswordFilter(unauthenticatedService), UsernamePasswordAuthenticationFilter.class);
         https.securityMatcher("u1/**")
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(new OnceTokenFilter(unauthenticatedService), UsernamePasswordFilter.class);
+                .addFilterBefore(new OnceTokenFilter(unauthenticatedService, jwtService), UsernamePasswordFilter.class);
         return https.build();
     }
     @Bean

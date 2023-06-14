@@ -29,14 +29,18 @@ public class ProdConfig {
                 .build();
     }
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity https, UnauthenticatedService unauthenticatedService) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity https,
+            UnauthenticatedService unauthenticatedService,
+            JwtService jwtService
+    ) throws Exception {
         https.authorizeHttpRequests(auth-> auth
                 .requestMatchers("a/**")
                 .permitAll());
         https.securityMatcher("u2/**")
                 .addFilter(new UsernamePasswordFilter(unauthenticatedService));
         https.securityMatcher("u1/**")
-                .addFilter(new OnceTokenFilter(unauthenticatedService));
+                .addFilter(new OnceTokenFilter(unauthenticatedService, jwtService));
         https.formLogin(AbstractHttpConfigurer::disable);
         https.httpBasic(AbstractHttpConfigurer::disable);
         https.csrf(AbstractHttpConfigurer::disable);

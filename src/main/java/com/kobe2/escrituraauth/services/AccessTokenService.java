@@ -1,6 +1,7 @@
 package com.kobe2.escrituraauth.services;
 
 import com.kobe2.escrituraauth.entities.AccessToken;
+import com.kobe2.escrituraauth.entities.EscrituraUser;
 import com.kobe2.escrituraauth.repositories.AccessTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,14 @@ public class AccessTokenService {
 
     public AccessToken findByCode(UUID uuid) {
         Optional<AccessToken> abstractToken = accessTokenRepository.findByCode(uuid);
+        if (abstractToken.isPresent()){
+            return abstractToken.get();
+        } else {
+            throw new IllegalArgumentException("CODE NOT FOUND");
+        }
+    }
+    public AccessToken findByUser(EscrituraUser user) {
+        Optional<AccessToken> abstractToken = accessTokenRepository.findByUserId(user.getId());
         if (abstractToken.isPresent()){
             return abstractToken.get();
         } else {

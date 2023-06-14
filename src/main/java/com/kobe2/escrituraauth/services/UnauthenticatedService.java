@@ -6,6 +6,7 @@ import com.kobe2.escrituraauth.entities.EscrituraUser;
 import com.kobe2.escrituraauth.entities.RefreshToken;
 import com.kobe2.escrituraauth.records.UserRecord;
 import com.kobe2.escrituraauth.repositories.UserRepository;
+import com.kobe2.escrituraauth.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.NotAuthorizedException;
@@ -37,6 +38,7 @@ public class UnauthenticatedService implements UserDetailsService {
     private final UnauthenticatedRoleService unauthenticatedRoleService;
     private final BasicUserService basicUserService;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 //    private final MqProducer mqProducer;
     public void signupSendConfirmation(UserRecord userRecord) throws UsernameNotFoundException {
         logger.info("signupSendConfirmation");
@@ -94,8 +96,13 @@ public class UnauthenticatedService implements UserDetailsService {
     }
     public HttpServletResponse setHeaders(EscrituraUser user, HttpServletResponse response) {
         logger.log(Level.INFO, "setHeaders");
-        HttpServletResponse respWithAccess = this.setAccess(user, response);
-        return this.setRefresh(user, respWithAccess);
+        RefreshToken refreshToken = new RefreshToken(user);
+        refreshTokenService.save(refreshToken);
+        AccessToken accessToken = new AccessToken(user);
+        accessTokenService.save(accessToken);
+        String jwt = jwtService.generateUserToken(refreshToken, accessToken);
+        response.setHeader("Authorization", "Bearer "+jwt);
+        return response;
     }
     public HttpServletResponse setRefresh(EscrituraUser user, HttpServletResponse response) {
         logger.log(Level.INFO, "setRefresh");
@@ -130,10 +137,10 @@ public class UnauthenticatedService implements UserDetailsService {
         UUID accessUUID = UUID.fromString(accessString);
         return accessTokenService.findByCode(accessUUID);
     }
-    public HttpServletResponse checkOrRefreshAccess(HttpServletRequest request, HttpServletResponse response, EscrituraUser refreshUser) {
+    public HttpServletResponse checkOrRefreshAccess(RefreshToken refreshToken, AccessToken accessToken, HttpServletResponse response) {
         logger.info("checkOrRefreshAccess");
-        AccessToken accessToken = this.getAccessTokenFromRequest(request);
         EscrituraUser accessUser = accessToken.getUser();
+        EscrituraUser refreshUser = refreshToken.getUser();
         if (accessUser.getId().equals(refreshUser.getId())) {
             if (accessToken.isExpired()) {
                 AccessToken newToken = new AccessToken(accessUser);
@@ -148,12 +155,17 @@ public class UnauthenticatedService implements UserDetailsService {
 
     public HttpServletResponse authViaHeaders(HttpServletRequest request, HttpServletResponse response) {
         logger.log(Level.INFO, "checkOrRefreshHeaders");
-        try {
-            EscrituraUser refreshUser = this.getFromRefreshToken(request);
-            return this.checkOrRefreshAccess(request, response, refreshUser);
-        } catch (Exception e) {
-            throw new NotAuthorizedException("MISMATCHED TOKENS");
-        }
+//        try {
+            String token = request.getHeader("Authorization").split("Bearer ")[1];
+            System.out.println("token:"+token);
+            UUID refreshTokenId = UUID.fromString(jwtService.extractRefresh(token));
+            RefreshToken refreshToken = refreshTokenService.findByCode(refreshTokenId);
+            UUID accessTokenId = UUID.fromString(jwtService.extractAccess(token));
+            AccessToken accessToken = accessTokenService.findByCode(accessTokenId);
+            return this.checkOrRefreshAccess(refreshToken, accessToken, response);
+//        } catch (Exception e) {
+//            throw new NotAuthorizedException("MISMATCHED TOKENS");
+//        }
     }
 
     public HttpServletResponse authViaUsernameAndPass(HttpServletRequest request, HttpServletResponse response) throws NotAuthorizedException {

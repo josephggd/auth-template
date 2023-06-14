@@ -1,5 +1,6 @@
 package com.kobe2.escrituraauth.services;
 
+import com.kobe2.escrituraauth.entities.EscrituraUser;
 import com.kobe2.escrituraauth.entities.RefreshToken;
 import com.kobe2.escrituraauth.repositories.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,14 @@ public class RefreshTokenService {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     public RefreshToken findByCode(UUID uuid) {
         Optional<RefreshToken> abstractToken = refreshTokenRepository.findByCode(uuid);
+        if (abstractToken.isPresent()){
+            return abstractToken.get();
+        } else {
+            throw new IllegalArgumentException("CODE NOT FOUND");
+        }
+    }
+    public RefreshToken findByUser(EscrituraUser user) {
+        Optional<RefreshToken> abstractToken = refreshTokenRepository.findByUserId(user.getId());
         if (abstractToken.isPresent()){
             return abstractToken.get();
         } else {

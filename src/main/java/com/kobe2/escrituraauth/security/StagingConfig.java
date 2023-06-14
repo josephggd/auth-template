@@ -34,7 +34,11 @@ public class StagingConfig {
                 .build();
     }
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity https, UnauthenticatedService unauthenticatedService) throws Exception {
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity https,
+            UnauthenticatedService unauthenticatedService,
+            JwtService jwtService
+    ) throws Exception {
         logger.log(Level.INFO, "securityFilterChain");
         https.authorizeHttpRequests(auth-> auth
                 .requestMatchers("a/**")
@@ -42,7 +46,7 @@ public class StagingConfig {
         https.securityMatcher("u2/**")
                 .addFilter(new UsernamePasswordFilter(unauthenticatedService));
         https.securityMatcher("u1/**")
-                .addFilter(new OnceTokenFilter(unauthenticatedService));
+                .addFilter(new OnceTokenFilter(unauthenticatedService, jwtService));
         https.formLogin(AbstractHttpConfigurer::disable);
         https.httpBasic(AbstractHttpConfigurer::disable);
         https.csrf(AbstractHttpConfigurer::disable);

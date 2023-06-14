@@ -16,8 +16,13 @@ import java.util.List;
 public class OnceTokenFilter extends OncePerRequestFilter {
     private final List<String> excludeUrlPatterns = List.of("/h2-console", "/a/", "/u2/");
     private final UnauthenticatedService unauthenticatedService;
-    public OnceTokenFilter(UnauthenticatedService unauthenticatedService) {
+    private final JwtService jwtService;
+    public OnceTokenFilter(
+            UnauthenticatedService unauthenticatedService,
+            JwtService jwtService
+    ) {
         this.unauthenticatedService = unauthenticatedService;
+        this.jwtService = jwtService;
     }
 
     @Override

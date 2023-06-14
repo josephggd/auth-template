@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface AccessTokenRepository extends JpaRepository<AccessToken, UUID> {
     Optional<AccessToken> findByCode(UUID uuid);
+    Optional<AccessToken> findByUserId(UUID uuid);
 }
