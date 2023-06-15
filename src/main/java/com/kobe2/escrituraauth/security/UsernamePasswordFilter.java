@@ -7,7 +7,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.NotAuthorizedException;
 import lombok.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -36,14 +38,19 @@ public class UsernamePasswordFilter extends OncePerRequestFilter {
         logger.info("doFilterInternal");
         RequestWrapper wrapper = new RequestWrapper(request);
         UserRecord userRecord = wrapper.toUserRecord();
-        EscrituraUser user = unauthenticatedService.loginUser(userRecord.username(), userRecord.password());
-        HttpServletResponse newResponse = unauthenticatedService.setHeaders(user, response);
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user, null, user.getRoles());
-        token.setDetails(
-                new WebAuthenticationDetailsSource().buildDetails(wrapper)
-        );
-        SecurityContextHolder.getContext().setAuthentication(token);
-        filterChain.doFilter(wrapper, newResponse);
+        try {
+            EscrituraUser user = unauthenticatedService.loginUser(userRecord.username(), userRecord.password());
+            HttpServletResponse newResponse = unauthenticatedService.setHeaders(user, response);
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user, null, user.getRoles());
+            token.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(wrapper)
+            );
+            SecurityContextHolder.getContext().setAuthentication(token);
+            filterChain.doFilter(wrapper, newResponse);
+        } catch (NotAuthorizedException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+        }
     }
 
 }

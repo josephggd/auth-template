@@ -5,7 +5,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.NotAuthorizedException;
 import lombok.NonNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -31,8 +33,13 @@ public class OnceTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         logger.info("doFilterInternal");
-        HttpServletResponse newResponse = unauthenticatedService.authViaHeaders(request, response);
-        filterChain.doFilter(request, newResponse);
+        try {
+            HttpServletResponse newResponse = unauthenticatedService.authViaHeaders(request, response);
+            filterChain.doFilter(request, newResponse);
+        } catch (NotAuthorizedException e) {
+            logger.warn(e.getMessage());
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+        }
     }
 
 }
