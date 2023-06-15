@@ -26,7 +26,7 @@ public class UsernamePasswordFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         logger.info("shouldNotFilter");
         return excludeUrlPatterns.stream().anyMatch(s -> request.getServletPath().startsWith(s));
     }

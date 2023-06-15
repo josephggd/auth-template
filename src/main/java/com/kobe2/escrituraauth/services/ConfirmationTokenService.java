@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
@@ -17,7 +16,7 @@ public class ConfirmationTokenService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     public ConfirmationToken findByCode(UUID uuid) {
-        logger.log(Level.INFO, "findByCode");
+        logger.info( "findByCode");
         Optional<ConfirmationToken> abstractToken = confirmationTokenRepository.findByCode(uuid);
         if (abstractToken.isPresent()){
             return abstractToken.get();
@@ -27,7 +26,7 @@ public class ConfirmationTokenService {
         }
     }
     public void revokeByUser(UUID userId){
-        logger.log(Level.INFO, "revokeToken");
+        logger.info( "revokeToken");
         confirmationTokenRepository.deleteAllByUserId(userId);
     }
     public void save(ConfirmationToken token) {

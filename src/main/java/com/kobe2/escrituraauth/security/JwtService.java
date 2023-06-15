@@ -65,6 +65,7 @@ public class JwtService {
             RefreshToken refreshToken,
             AccessToken accessToken
     ) {
+        logger.info("generateUserToken");
         long millis = System.currentTimeMillis();
         Algorithm algorithm =Algorithm.HMAC256(Base64.getDecoder().decode(SECRET));
         return JWT
@@ -81,6 +82,7 @@ public class JwtService {
     public String generateApiToken(
             EscrituraUser proxyUser
     ) {
+        logger.info("generateApiToken");
         long millis = System.currentTimeMillis();
         Algorithm algorithm =Algorithm.HMAC256(Base64.getDecoder().decode(SECRET));
         return JWT

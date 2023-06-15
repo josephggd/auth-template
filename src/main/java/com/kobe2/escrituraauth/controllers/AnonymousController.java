@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 public class AnonymousController {
     private final Logger logger = Logger.getLogger(this.getClass().toString());
     private final UnauthenticatedService unauthenticatedService;
-    @PostMapping("/s/r")
+    @PostMapping("/sign/r")
     public ResponseEntity<String> signupRequest(
             @RequestBody UserRecord userRecord
     ) {
@@ -33,12 +33,37 @@ public class AnonymousController {
             throw new CannedStatementException();
         }
     }
-    @PostMapping("/s/c/{code}")
+    @PostMapping("/sign/c/{code}")
     public ResponseEntity<String> signupConfirm(
             @PathVariable UUID code
     ) {
         try {
             unauthenticatedService.signupConfirmUser(code);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }  catch (Exception e) {
+            logger.warning(e.getMessage());
+            throw new CannedStatementException();
+        }
+    }
+    @PostMapping("/req/r")
+    public ResponseEntity<String> resetRequest(
+            @RequestBody UserRecord userRecord
+    ) {
+        try {
+            unauthenticatedService.resetRequest(userRecord);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }  catch (Exception e) {
+            logger.warning(e.getMessage());
+            throw new CannedStatementException();
+        }
+    }
+    @PostMapping("/req/c/{code}")
+    public ResponseEntity<String> resetConfirm(
+            @PathVariable UUID code,
+            @RequestBody UserRecord userRecord
+    ) {
+        try {
+            unauthenticatedService.resetConfirm(code, userRecord.password());
             return new ResponseEntity<>(HttpStatus.OK);
         }  catch (Exception e) {
             logger.warning(e.getMessage());

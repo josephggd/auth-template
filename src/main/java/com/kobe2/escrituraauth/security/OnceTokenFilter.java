@@ -16,17 +16,14 @@ import java.util.List;
 public class OnceTokenFilter extends OncePerRequestFilter {
     private final List<String> excludeUrlPatterns = List.of("/h2-console", "/a/", "/u2/");
     private final UnauthenticatedService unauthenticatedService;
-    private final JwtService jwtService;
     public OnceTokenFilter(
-            UnauthenticatedService unauthenticatedService,
-            JwtService jwtService
+            UnauthenticatedService unauthenticatedService
     ) {
         this.unauthenticatedService = unauthenticatedService;
-        this.jwtService = jwtService;
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
         logger.info("shouldNotFilter");
         return excludeUrlPatterns.stream().anyMatch(s -> request.getServletPath().startsWith(s));
     }

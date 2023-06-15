@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Service
@@ -39,6 +38,24 @@ public class UnauthenticatedService implements UserDetailsService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
 //    private final MqProducer mqProducer;
+
+    public void resetRequest(UserRecord userRecord) {
+        logger.info("resetRequest");
+        String email = userRecord.username();
+        EscrituraUser unconfirmedUser = basicUserService.findByEmail(email);
+        this.addNewToken(unconfirmedUser);
+//        mqProducer.sendConfirmationCode(unconfirmedUser, confirmationToken);
+    }
+    public void resetConfirm(UUID emailCode, String newPass) throws UsernameNotFoundException {
+        logger.info( "resetConfirm");
+        ConfirmationToken token = confirmationTokenService.cCodeCheck(emailCode);
+        String encodedPw = passwordEncoder.encode(newPass);
+        EscrituraUser requestingUser = token.getUser();
+        requestingUser.setPassword(encodedPw);
+        basicUserService.save(requestingUser);
+        token.setExpiration(LocalDateTime.MIN);
+        confirmationTokenService.save(token);
+    }
     public void signupSendConfirmation(UserRecord userRecord) throws UsernameNotFoundException {
         logger.info("signupSendConfirmation");
         String email = userRecord.username();
@@ -54,6 +71,7 @@ public class UnauthenticatedService implements UserDetailsService {
 //        mqProducer.sendConfirmationCode(unconfirmedUser, confirmationToken);
     }
     public void addNewToken(EscrituraUser user) {
+        logger.info("addNewToken");
         try {
             confirmationTokenService.revokeByUser(user.getId());
         } catch (Exception e) {
@@ -63,7 +81,7 @@ public class UnauthenticatedService implements UserDetailsService {
         confirmationTokenService.save(newToken);
     }
     public void signupConfirmUser(UUID emailCode) throws UsernameNotFoundException {
-        logger.log(Level.INFO, "signupSaveUser");
+        logger.info( "signupSaveUser");
         ConfirmationToken token = confirmationTokenService.cCodeCheck(emailCode);
         EscrituraUser requestingUser = token.getUser();
         EscrituraUser user = unauthenticatedRoleService.setRoleAsUser(requestingUser);
@@ -72,7 +90,7 @@ public class UnauthenticatedService implements UserDetailsService {
         confirmationTokenService.save(token);
     }
     public EscrituraUser loginUser(String username, String password) throws NotAuthorizedException {
-        logger.log(Level.INFO, "loginUser");
+        logger.info( "loginUser");
         EscrituraUser user = basicUserService.findByEmail(username);
         boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
         if (passwordMatches && user.isEnabled()) {
@@ -82,7 +100,7 @@ public class UnauthenticatedService implements UserDetailsService {
         throw new NotAuthorizedException("BAD AUTH");
     }
     public HttpServletResponse setHeaders(EscrituraUser user, HttpServletResponse response) {
-        logger.log(Level.INFO, "setHeaders");
+        logger.info( "setHeaders");
         RefreshToken refreshToken = new RefreshToken(user);
         refreshTokenService.save(refreshToken);
         AccessToken accessToken = new AccessToken(user);
@@ -110,7 +128,7 @@ public class UnauthenticatedService implements UserDetailsService {
     }
 
     public HttpServletResponse authViaHeaders(HttpServletRequest request, HttpServletResponse response) {
-        logger.log(Level.INFO, "checkOrRefreshHeaders");
+        logger.info( "checkOrRefreshHeaders");
         try {
             String token = request.getHeader(HttpHeaders.AUTHORIZATION).split(BEARER)[1];
             UUID refreshTokenId = UUID.fromString(jwtService.extractRefresh(token));
@@ -125,6 +143,7 @@ public class UnauthenticatedService implements UserDetailsService {
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        logger.info("loadUserByUsername");
         return basicUserService.findByEmail(username);
     }
 }
